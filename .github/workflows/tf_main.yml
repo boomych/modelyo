@@ -1,7 +1,4 @@
-name: Terraform CI/CD
-
-description: >
-  Workflow that supports both PR-triggered plan and full multi-environment deployment
+name: Terraform plan/apply CI/CD
 
 on:
   pull_request:

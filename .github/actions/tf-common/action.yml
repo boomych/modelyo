@@ -3,9 +3,10 @@ description: Common Terraform steps
 inputs:
   env:
     required: true
+    description: "Environment name"
 
 runs:
-  using: \"composite\"
+  using: "composite"
   steps:
     - uses: actions/checkout@v4
 
@@ -16,10 +17,12 @@ runs:
 
     - name: Set up credentials
       run: echo "$GOOGLE_APPLICATION_CREDENTIALS" > /tmp/account.json
+      shell: bash
       env:
         GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
     - name: Terraform Init
       run: terraform init -backend-config="bucket=modelyo-tf-states-bucket" -backend-config="prefix=terraform/state"
+      shell: bash
       env:
         GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
