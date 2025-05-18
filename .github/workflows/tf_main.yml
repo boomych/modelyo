@@ -35,7 +35,7 @@ jobs:
       - name: Terraform Plan
         run: |
           terraform workspace select -or-create ${{ matrix.env }}
-          terraform plan -var-file="envs/${{ matrix.env }}.tfvars"
+          terraform plan -var-file="tf/envs/${{ matrix.env }}.tfvars"
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
 
