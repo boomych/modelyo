@@ -15,6 +15,7 @@ jobs:
       name: ${{ inputs.env }}
 
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/tf-common
         with:
           env: ${{ inputs.env }}
