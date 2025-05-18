@@ -25,7 +25,7 @@ jobs:
     environment:
       name: ${{ matrix.env }}
     steps:
-      - uses: ./.github/actions/terraform-action
+      - uses: ./.github/actions/tf-common
         with:
           env: ${{ matrix.env }}
 
@@ -50,7 +50,7 @@ jobs:
       # just to visualize the link to the project
       url: https://console.cloud.google.com/compute/instances?project=promising-flash-460213-k1
     steps:
-      - uses: ./.github/actions/terraform-action
+      - uses: ./.github/actions/tf-common
         with:
           env: "dev"
 
@@ -72,7 +72,7 @@ jobs:
       # just to visualize the link to the project
       url: https://console.cloud.google.com/compute/instances?project=promising-flash-460213-k1
     steps:
-      - uses: ./.github/actions/terraform-action
+      - uses: ./.github/actions/tf-common
         with:
           env: "uat"
 
@@ -94,7 +94,7 @@ jobs:
       # just to visualize the link to the project
       url: https://console.cloud.google.com/compute/instances?project=promising-flash-460213-k1
     steps:
-      - uses: ./.github/actions/terraform-action
+      - uses: ./.github/actions/tf-common
         with:
           env: "prod"
 
