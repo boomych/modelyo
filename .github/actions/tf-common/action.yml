@@ -19,7 +19,7 @@ runs:
       run: echo "$GOOGLE_APPLICATION_CREDENTIALS" > /tmp/account.json
       shell: bash
       env:
-        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
 
     - name: Terraform Init
       run: terraform init -backend-config="bucket=modelyo-tf-states-bucket" -backend-config="prefix=terraform/state"

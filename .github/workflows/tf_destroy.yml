@@ -19,6 +19,8 @@ jobs:
       - uses: ./.github/actions/tf-common
         with:
           env: ${{ inputs.env }}
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
       - name: Terraform Destroy
         run: |
