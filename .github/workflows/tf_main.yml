@@ -35,7 +35,7 @@ jobs:
       - name: Terraform Plan
         run: |
           terraform workspace select -or-create ${{ matrix.env }}
-          terraform plan -var-file="tf/envs/${{ matrix.env }}.tfvars"
+          terraform plan -var-file="./tf/envs/${{ matrix.env }}.tfvars"
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
 
@@ -63,7 +63,7 @@ jobs:
       - name: Terraform Apply
         run: |
           terraform workspace select -or-create dev
-          terraform apply -auto-approve -var-file="tf/envs/dev.tfvars"
+          terraform apply -auto-approve -var-file="./tf/envs/dev.tfvars"
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
 
@@ -88,7 +88,7 @@ jobs:
       - name: Terraform Apply
         run: |
           terraform workspace select -or-create uat
-          terraform apply -auto-approve -var-file="tf/envs/uat.tfvars"
+          terraform apply -auto-approve -var-file="./tf/envs/uat.tfvars"
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
 
@@ -113,7 +113,7 @@ jobs:
       - name: Terraform Apply
         run: |
           terraform workspace select -or-create prod
-          terraform apply -auto-approve -var-file="tf/envs/prod.tfvars"
+          terraform apply -auto-approve -var-file="./tf/envs/prod.tfvars"
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
     concurrency:
