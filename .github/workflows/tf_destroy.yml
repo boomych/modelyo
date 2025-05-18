@@ -25,6 +25,6 @@ jobs:
       - name: Terraform Destroy
         run: |
           terraform workspace select -or-create ${{ inputs.env }}
-          terraform destroy -auto-approve -var-file="tf/envs/${{ inputs.env }}.tfvars"
+          terraform destroy -auto-approve -var-file="${{ github.workspace }}/tf/envs/${{ inputs.env }}.tfvars"
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
