@@ -22,8 +22,6 @@ jobs:
     strategy:
       matrix:
         env: ["dev", "uat", "prod"]
-    environment:
-      name: ${{ matrix.env }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/tf-common
@@ -33,9 +31,10 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
       - name: Terraform Plan
+        working-directory: tf
         run: |
           terraform workspace select -or-create ${{ matrix.env }}
-          terraform plan -var-file="${{ github.workspace }}/tf/envs/${{ matrix.env }}.tfvars"
+          terraform plan -var-file="envs/${{ matrix.env }}.tfvars"
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
 
@@ -61,9 +60,10 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
       - name: Terraform Apply
+        working-directory: tf
         run: |
           terraform workspace select -or-create dev
-          terraform apply -auto-approve -var-file="${{ github.workspace }}/tf/envs/dev.tfvars"
+          terraform apply -auto-approve -var-file="envs/dev.tfvars"
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
 
@@ -86,9 +86,10 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
       - name: Terraform Apply
+        working-directory: tf
         run: |
           terraform workspace select -or-create uat
-          terraform apply -auto-approve -var-file="${{ github.workspace }}/tf/envs/uat.tfvars"
+          terraform apply -auto-approve -var-file="tf/envs/uat.tfvars"
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
 
@@ -111,9 +112,10 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
       - name: Terraform Apply
+        working-directory: tf
         run: |
           terraform workspace select -or-create prod
-          terraform apply -auto-approve -var-file="${{ github.workspace }}/tf/envs/prod.tfvars"
+          terraform apply -auto-approve -var-file="envs/prod.tfvars"
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
     concurrency:
