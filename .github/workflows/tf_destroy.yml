@@ -23,7 +23,7 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
       - name: Terraform Destroy
-        working-directory: tf
+        working-directory: "tf"
         run: |
           terraform workspace select -or-create ${{ inputs.env }}
           terraform destroy -auto-approve -var-file="${{ github.workspace }}/tf/envs/${{ inputs.env }}.tfvars"
