@@ -1,0 +1,112 @@
+name: Terraform CI/CD
+
+description: >
+  Workflow that supports both PR-triggered plan and full multi-environment deployment
+
+on:
+  pull_request:
+    branches: [main]
+
+  push:
+    branches: [main]
+
+  workflow_dispatch:
+    inputs:
+      envs:
+        description: "Environments to deploy (comma-separated: dev,uat,prod)"
+        required: false
+        default: "dev, uat"
+
+jobs:
+  plan:
+    name: Terraform Plan (on PR)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: ["dev", "uat", "prod"]
+    environment:
+      name: ${{ matrix.env }}
+    steps:
+      - uses: ./.github/actions/terraform-action
+        with:
+          env: ${{ matrix.env }}
+
+      - name: Terraform Plan
+        run: |
+          terraform workspace select ${{ matrix.env }} || terraform workspace new ${{ matrix.env }}
+          terraform plan -var-file="envs/${{ matrix.env }}.tfvars"
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ matrix.env }}
+      cancel-in-progress: true
+
+  deploy_dev:
+    name: Deploy to DEV
+    if: (github.event_name == 'workflow_dispatch' && contains(github.event.inputs.envs, 'dev')) || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    continue-on-error: false
+    environment:
+      name: dev
+      # just to visualize the link to the project
+      url: https://console.cloud.google.com/compute/instances?project=promising-flash-460213-k1
+    steps:
+      - uses: ./.github/actions/terraform-action
+        with:
+          env: "dev"
+
+      - name: Terraform Apply
+        run: |
+          terraform workspace select dev || terraform workspace new dev
+          terraform apply -auto-approve -var-file="envs/dev.tfvars"
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
+
+  deploy_uat:
+    name: Deploy to UAT
+    needs: deploy_dev
+    if: (github.event_name == 'workflow_dispatch' && contains(github.event.inputs.envs, 'uat')) || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    continue-on-error: false
+    environment:
+      name: uat
+      # just to visualize the link to the project
+      url: https://console.cloud.google.com/compute/instances?project=promising-flash-460213-k1
+    steps:
+      - uses: ./.github/actions/terraform-action
+        with:
+          env: "uat"
+
+      - name: Terraform Apply
+        run: |
+          terraform workspace select uat || terraform workspace new uat
+          terraform apply -auto-approve -var-file="envs/uat.tfvars"
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
+
+  deploy_prod:
+    name: Deploy to PROD only with approval and from the main branch
+    needs: deploy_uat
+    if: ((github.event_name == 'workflow_dispatch' && contains(github.event.inputs.envs, 'prod')) || github.event_name == 'push') && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    continue-on-error: false
+    environment:
+      name: prod
+      # just to visualize the link to the project
+      url: https://console.cloud.google.com/compute/instances?project=promising-flash-460213-k1
+    steps:
+      - uses: ./.github/actions/terraform-action
+        with:
+          env: "prod"
+
+      - name: Terraform Apply
+        run: |
+          terraform workspace select prod || terraform workspace new prod
+          terraform apply -auto-approve -var-file="envs/prod.tfvars"
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
+    concurrency:
+      group: terraform-${{ github.job }}
+      cancel-in-progress: false

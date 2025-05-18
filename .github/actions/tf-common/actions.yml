@@ -1,0 +1,25 @@
+name: Terraform Steps
+description: Common Terraform steps
+inputs:
+  env:
+    required: true
+
+runs:
+  using: \"composite\"
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.12.0
+
+    - name: Set up credentials
+      run: echo "$GOOGLE_APPLICATION_CREDENTIALS" > /tmp/account.json
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+
+    - name: Terraform Init
+      run: terraform init -backend-config="bucket=modelyo-tf-states-bucket" -backend-config="prefix=terraform/state"
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
