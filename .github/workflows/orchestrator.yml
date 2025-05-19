@@ -91,5 +91,5 @@ jobs:
             --repo "${{ github.repository }}" \
             --ref "${{ github.ref_name }}" \
             -f env='${{ needs.generate.outputs.firstEnv }}' \
-            -f remainingEnvs='${{ needs.generate.outputs.remainingEnvs }}'
+            -f remainingEnvs='${{ needs.generate.outputs.remainingEnvs }}' \
             -f runName='${{ github.run_number }}'
