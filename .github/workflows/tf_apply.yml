@@ -4,9 +4,23 @@ on:
   workflow_call:
     inputs:
       env:
+        description: "Current env"
         required: true
         type: string
       remainingEnvs:
+        description: "Remaining envs (JSON array)"
+        required: false
+        type: string
+
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "Current env"
+        required: true
+        type: string
+      remainingEnvs:
+        description: "Remaining envs (JSON array)"
+        required: false
         type: string
 
 jobs:
