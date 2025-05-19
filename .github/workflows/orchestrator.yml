@@ -86,7 +86,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Start chain
         run: |
-          gh workflow run "Terraform plan/apply CI/CD" \
+          gh workflow run "Terraform apply CI/CD" \
             --repo "${{ github.repository }}" \
             --ref "${{ github.ref_name }}" \
             -f env='${{ needs.generate.outputs.firstEnv }}' \
