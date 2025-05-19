@@ -23,10 +23,10 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
       - name: Download tfvars
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: tfvars
-          path: envs
+          path: tf/envs
 
       - name: Terraform Plan
         working-directory: "tf"

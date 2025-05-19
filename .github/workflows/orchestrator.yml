@@ -38,7 +38,7 @@ jobs:
         if: github.event_name == 'pull_request'
         id: extractMatrix
         run: |
-          MATRIX=$(jq -c '[.[] | {name: .name, needs: (.needs // null)}]' configuration/envs.json)
+          MATRIX=$(jq -c '[.[] | {name: .name}]' configuration/envs.json)
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
           echo $MATRIX
 
