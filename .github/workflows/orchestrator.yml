@@ -83,9 +83,10 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - uses: actions/checkout@v4
       - name: Start chain
         run: |
           gh workflow run tf_apply.yml \
             --ref "${{ github.ref_name }}" \
-            -f env=${{ needs.generate.outputs.firstEnv }} \
+            -f env='${{ needs.generate.outputs.firstEnv }}' \
             -f remainingEnvs='${{ needs.generate.outputs.remainingEnvs }}'
