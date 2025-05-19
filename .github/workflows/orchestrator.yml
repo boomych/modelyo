@@ -54,7 +54,7 @@ jobs:
     name: Terraform Plan (on PR)
     if: github.event_name == 'pull_request'
     needs: generate
-    uses: ./.github/workflows/tf-plan.yml
+    uses: ./.github/workflows/tf_plan.yml
     with:
       matrix: ${{ needs.generate.outputs.matrix }}
     secrets: inherit
