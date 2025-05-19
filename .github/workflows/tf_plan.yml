@@ -28,10 +28,13 @@ jobs:
           name: tfvars
           path: tf/envs
 
+      - run: |
+          echo "Deploying for env: ${{ matrix.name }}"
+
       - name: Terraform Plan
         working-directory: "tf"
         run: |
-          terraform workspace select -or-create ${{ matrix.name }}
+          terraform workspace select -or-create "${{ matrix.name }}"
           terraform plan -var-file="envs/${{ matrix.name }}.tfvars.json"
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
