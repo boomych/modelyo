@@ -19,7 +19,7 @@ jobs:
     outputs:
       matrix: ${{ steps.extractMatrix.outputs.matrix }}
       firstEnv: ${{ steps.extractEnvs.outputs.env}}
-      remainingEnvs: ${{ steps.extractEnvs.outputs.remaining_envs}}
+      remainingEnvs: ${{ steps.extractEnvs.outputs.remainingEnvs}}
     steps:
       - uses: actions/checkout@v4
 
@@ -46,12 +46,23 @@ jobs:
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         id: extractEnvs
         run: |
-          result=$(jq -c '
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "Manual trigger: filtering by input"
+            SELECTED=$(echo "${{ github.event.inputs.envs }}" | tr ',' '\n' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            echo "Selected: $SELECTED"
+            FILTERED=$(jq --argjson names "$SELECTED" '[.[] | select($names | index(.name))]' configuration/envs.json)
+          else
+            echo "Non-manual trigger: using full env list"
+            FILTERED=$(cat configuration/envs.json)
+          fi
+
+          result=$(echo "$FILTERED" | jq -c '
             (map(.name)) as $names
-            | {env: $names[0], remaining_envs: $names[1:]}
-          ' configuration/envs.json)
+            | {env: $names[0], remainingEnvs: $names[1:]}
+          ')
+
           echo "env=$(echo "$result" | jq -r '.env')" >> $GITHUB_OUTPUT
-          echo "remaining_envs=$(echo "$result" | jq -c '.remaining_envs')" >> $GITHUB_OUTPUT
+          echo "remainingEnvs=$(echo "$result" | jq -c '.remainingEnvs')" >> $GITHUB_OUTPUT
 
   plan:
     name: Terraform Plan (on PR)
