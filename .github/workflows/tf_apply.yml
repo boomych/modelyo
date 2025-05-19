@@ -52,3 +52,7 @@ jobs:
         with:
           env: ${{ inputs.env }}
           remaining_envs: ${{ inputs.remainingEnvs }}
+        env:
+          GH_TOKEN: ${{ secrets.PAT_WORKFLOW }}
+          REF: ${{ env.GITHUB_REF_NAME }}
+          REPO: ${{ env.GITHUB_REPOSITORY }}
