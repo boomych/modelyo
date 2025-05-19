@@ -46,4 +46,4 @@ runs:
           --ref "${REF}" \
           -f env="$NEXT_ENV" \
           -f remainingEnvs="$NEXT_REMAINING" \
-          -f runName="RUNNAME"
+          -f runName="$RUNNAME"
