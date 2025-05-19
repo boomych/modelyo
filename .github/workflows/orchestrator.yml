@@ -40,6 +40,7 @@ jobs:
         run: |
           MATRIX=$(jq -c '[.[] | {name: .name, needs: (.needs // null)}]' configuration/envs.json)
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          echo $MATRIX
 
       - name: Extract first and remaining
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
