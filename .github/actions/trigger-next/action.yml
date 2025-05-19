@@ -15,9 +15,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Trigger next env (if any)
+    - name: Trigger next env from list ${{ inputs.remaining_envs }}
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.PAT_WORKFLOW }}
       shell: bash
       run: |
         CURRENT="${{ inputs.env }}"
