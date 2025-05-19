@@ -1,4 +1,4 @@
-name: Terraform plan/apply CI/CD
+name: Terraform apply CI/CD
 
 on:
   workflow_call:

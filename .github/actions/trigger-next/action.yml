@@ -36,7 +36,8 @@ runs:
 
         echo "Triggering $NEXT_ENV with rest: $NEXT_REMAINING"
 
-        gh workflow run tf_apply.yml \
-          --ref "${{ github.ref_name }}" \
-          -f env="$NEXT_ENV" \
-          -f remainingEnvs="$NEXT_REMAINING"
+        gh workflow run "Terraform apply CI/CD" \
+            --repo "${{ github.repository }}" \
+            --ref "${{ github.ref_name }}" \
+            -f env='${{ needs.generate.outputs.firstEnv }}' \
+            -f remainingEnvs='${{ needs.generate.outputs.remainingEnvs }}'
