@@ -25,7 +25,7 @@ on:
 
 jobs:
   apply:
-    name: Deploy to environment
+    name: Deploy to environment ${{ inputs.env }}
     runs-on: ubuntu-latest
     continue-on-error: false
     environment:
