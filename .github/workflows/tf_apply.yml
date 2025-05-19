@@ -1,4 +1,5 @@
 name: Terraform apply CI/CD
+run-name: Apply ${{ inputs.env }} for the run ${{ inputs.runName }}
 
 on:
   workflow_call:
@@ -10,6 +11,10 @@ on:
       remainingEnvs:
         description: "Remaining envs (JSON array)"
         required: false
+        type: string
+      runName:
+        description: "Parent's run number"
+        required: true
         type: string
 
   workflow_dispatch:
@@ -25,7 +30,7 @@ on:
 
 jobs:
   apply:
-    name: Deploy to environment ${{ inputs.env }}
+    name: Deploy to environment ${{ inputs.env }} on run ${{ inputs.runName }}
     runs-on: ubuntu-latest
     continue-on-error: false
     environment:
