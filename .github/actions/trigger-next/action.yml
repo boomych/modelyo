@@ -15,15 +15,16 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Trigger next env from list ${{ inputs.remaining_envs }}
+    - name: Trigger next env (if any)
       env:
-        GH_TOKEN: ${{ secrets.PAT_WORKFLOW }}
+        ENV: ${{ inputs.env }}
+        REMAINING: ${{ inputs.remaining_envs }}
+        GH_TOKEN: ${{ env.GH_TOKEN }}
+        REF: ${{ env.GITHUB_REF_NAME }}
+        REPO: ${{ env.GITHUB_REPOSITORY }}
       shell: bash
       run: |
-        CURRENT="${{ inputs.env }}"
-        REMAINING='${{ inputs.remaining_envs }}'
-
-        echo "Current env: $CURRENT"
+        echo "Current env: $ENV"
         echo "Remaining list: $REMAINING"
 
         NEXT_ENV=$(echo "$REMAINING" | jq -r '.[0]')
@@ -37,7 +38,7 @@ runs:
         echo "Triggering $NEXT_ENV with rest: $NEXT_REMAINING"
 
         gh workflow run "Terraform apply CI/CD" \
-            --repo "${{ github.repository }}" \
-            --ref "${{ github.ref_name }}" \
-            -f env='${{ needs.generate.outputs.firstEnv }}' \
-            -f remainingEnvs='${{ needs.generate.outputs.remainingEnvs }}'
+          --repo "${REPO}" \
+          --ref "${REF}" \
+          -f env="$NEXT_ENV" \
+          -f remainingEnvs="$NEXT_REMAINING"
