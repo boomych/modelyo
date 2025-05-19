@@ -1,5 +1,5 @@
 name: Terraform Orchestrator
-run-name: ${{ github.run_number }} from ${{ github.event_name }}
+run-name: Orchestrator run ${{ github.run_number }} from ${{ github.event_name }}
 
 on:
   pull_request:
@@ -92,4 +92,4 @@ jobs:
             --ref "${{ github.ref_name }}" \
             -f env='${{ needs.generate.outputs.firstEnv }}' \
             -f remainingEnvs='${{ needs.generate.outputs.remainingEnvs }}' \
-            -f runName='${{ github.run_number }}'
+            -f runName='${{ github.run_number }} from ${{ github.event_name }}'
