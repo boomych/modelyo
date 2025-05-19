@@ -14,8 +14,21 @@
     }
   },
   {
+    "name": "test",
+    "region": "me-west1",
+    "zone": "me-west1-a",
+    "controller_type": {
+      "instance_type": "e2-medium",
+      "instance_size": 20
+    },
+    "compute_type": {
+      "instance_type": "e2-medium",
+      "instance_size": 20,
+      "instance_count": 1
+    }
+  },
+  {
     "name": "uat",
-    "needs": "dev",
     "region": "me-west1",
     "zone": "me-west1-a",
     "controller_type": {
@@ -30,7 +43,6 @@
   },
   {
     "name": "prod",
-    "needs": "uat",
     "region": "me-west1",
     "zone": "me-west1-a",
     "controller_type": {
