@@ -48,7 +48,7 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "Manual trigger: filtering by input"
-            SELECTED=$(echo '"${{ github.event.inputs.envs }}"' | | tr -d ' ' | jq -c 'split(",")')
+            SELECTED=$(echo '"${{ github.event.inputs.envs }}"' | tr -d ' ' | jq -c 'split(",")')
           else
             echo "Non-manual trigger: using full env list"
             SELECTED=$(jq '[.[] | .name]' configuration/envs.json)
