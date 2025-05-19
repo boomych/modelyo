@@ -30,7 +30,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: tfvars
-          path: envs/*.tfvars.json
+          path: tf/envs/*.tfvars.json
 
       - name: Extract matrix from envs.json for plan
         if: github.event_name == 'pull_request'
