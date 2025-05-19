@@ -81,7 +81,7 @@ jobs:
     needs: generate
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.PAT_WORKFLOW }}
     steps:
       - uses: actions/checkout@v4
       - name: Start chain
