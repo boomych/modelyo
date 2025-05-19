@@ -11,6 +11,9 @@ inputs:
   remaining_envs:
     description: "JSON array of remaining env names"
     required: true
+  runName:
+    description: "Parent's run number"
+    required: true
 
 runs:
   using: "composite"
@@ -19,6 +22,7 @@ runs:
       env:
         ENV: ${{ inputs.env }}
         REMAINING: ${{ inputs.remaining_envs }}
+        RUNNAME: ${{ inputs.runName }}
         GH_TOKEN: ${{ env.GH_TOKEN }}
         REF: ${{ env.GITHUB_REF_NAME }}
         REPO: ${{ env.GITHUB_REPOSITORY }}
@@ -42,3 +46,4 @@ runs:
           --ref "${REF}" \
           -f env="$NEXT_ENV" \
           -f remainingEnvs="$NEXT_REMAINING"
+          -f runName="RUNNAME"
