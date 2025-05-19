@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/tf-common
         with:
-          env: ${{ matrix.env }}
+          env: ${{ matrix.name }}
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
@@ -31,11 +31,11 @@ jobs:
       - name: Terraform Plan
         working-directory: "tf"
         run: |
-          terraform workspace select -or-create ${{ matrix.env }}
-          terraform plan -var-file="envs/${{ matrix.env }}.tfvars.json"
+          terraform workspace select -or-create ${{ matrix.name }}
+          terraform plan -var-file="envs/${{ matrix.name }}.tfvars.json"
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
 
     concurrency:
-      group: ${{ github.workflow }}-${{ matrix.env }}
+      group: ${{ github.workflow }}-${{ matrix.name }}
       cancel-in-progress: true
