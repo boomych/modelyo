@@ -87,6 +87,7 @@ jobs:
       - name: Start chain
         run: |
           gh workflow run tf_apply.yml \
+            --repo "${{ github.repository }}" \
             --ref "${{ github.ref_name }}" \
             -f env='${{ needs.generate.outputs.firstEnv }}' \
             -f remainingEnvs='${{ needs.generate.outputs.remainingEnvs }}'
