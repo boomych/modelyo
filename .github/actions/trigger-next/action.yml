@@ -1,4 +1,4 @@
-name: Trigger next environment in chain
+name: Trigger next environment in the chain
 
 description: >
   Composite action to compute and trigger the next environment in a deployment chain.
@@ -15,7 +15,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Trigger next env (if any)
+    - name: Trigger next env from the list ${{ inputs.remaining_envs }}
       env:
         ENV: ${{ inputs.env }}
         REMAINING: ${{ inputs.remaining_envs }}
