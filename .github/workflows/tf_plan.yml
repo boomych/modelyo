@@ -1,0 +1,44 @@
+name: Terraform plan/apply CI/CD
+
+on:
+  workflow_call:
+    inputs:
+      matrix:
+        required: true
+        type: string
+
+jobs:
+  plan:
+    name: Terraform Plan (on PR)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJson(inputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/tf-common
+        with:
+          env: ${{ matrix.name }}
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+
+      - name: Download tfvars
+        uses: actions/download-artifact@v4
+        with:
+          name: tfvars
+          path: tf/envs
+
+      - run: |
+          echo "Deploying for env: ${{ matrix.name }}"
+
+      - name: Terraform Plan
+        working-directory: "tf"
+        run: |
+          terraform workspace select -or-create "${{ matrix.name }}"
+          terraform plan -var-file="envs/${{ matrix.name }}.tfvars.json"
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ matrix.name }}
+      cancel-in-progress: true

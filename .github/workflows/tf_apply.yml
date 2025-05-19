@@ -1,0 +1,54 @@
+name: Terraform plan/apply CI/CD
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        description: "Current env"
+        required: true
+        type: string
+      remainingEnvs:
+        description: "Remaining envs (JSON array)"
+        required: false
+        type: string
+
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "Current env"
+        required: true
+        type: string
+      remainingEnvs:
+        description: "Remaining envs (JSON array)"
+        required: false
+        type: string
+
+jobs:
+  apply:
+    name: Deploy to environment
+    runs-on: ubuntu-latest
+    continue-on-error: false
+    environment:
+      name: ${{ inputs.env }}
+      # just to visualize the link to the project
+      url: https://console.cloud.google.com/compute/instances?project=promising-flash-460213-k1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/tf-common
+        with:
+          env: ${{ inputs.env }}
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+
+      # - name: Terraform Apply
+      #   working-directory: tf
+      #   run: |
+      #     terraform workspace select -or-create ${{ inputs.env }}
+      #     terraform apply -auto-approve -var-file="envs/${{ inputs.env }}.tfvars.json"
+      #   env:
+      #     GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
+
+      - uses: ./.github/actions/trigger-next
+        with:
+          env: ${{ inputs.env }}
+          remaining_envs: ${{ inputs.remainingEnvs }}

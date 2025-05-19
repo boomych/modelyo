@@ -1,0 +1,31 @@
+name: Terraform Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "Environment to destroy (dev, uat, prod)"
+        required: true
+        type: string
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.env }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/tf-common
+        with:
+          env: ${{ inputs.env }}
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+
+      - name: Terraform Destroy
+        working-directory: "tf"
+        run: |
+          terraform workspace select -or-create ${{ inputs.env }}
+          terraform destroy -auto-approve -var-file="${{ github.workspace }}/tf/envs/${{ inputs.env }}.tfvars"
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json

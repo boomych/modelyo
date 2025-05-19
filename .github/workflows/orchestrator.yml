@@ -1,0 +1,93 @@
+name: Terraform Orchestrator
+
+on:
+  pull_request:
+    branches: [main]
+
+  push:
+    branches: [main]
+
+  workflow_dispatch:
+    inputs:
+      envs:
+        description: "Environments to deploy (comma-separated: dev,uat,prod etc.)"
+        required: false
+        default: "dev"
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.extractMatrix.outputs.matrix }}
+      firstEnv: ${{ steps.extractEnvs.outputs.env}}
+      remainingEnvs: ${{ steps.extractEnvs.outputs.remainingEnvs}}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate all tfvars
+        run: python3 scripts/generate_tfvars.py
+
+      - run: ls -R tf
+
+      - name: Upload tfvars
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfvars
+          path: tf/envs/*.tfvars.json
+
+      - name: Extract matrix from envs.json for plan
+        if: github.event_name == 'pull_request'
+        id: extractMatrix
+        run: |
+          MATRIX=$(jq -c '[.[] | {name: .name}]' configuration/envs.json)
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          echo $MATRIX
+
+      - name: Extract first and remaining
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        id: extractEnvs
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "Manual trigger: filtering by input"
+            SELECTED=$(echo '"${{ github.event.inputs.envs }}"' | tr -d ' ' | jq -c 'split(",")')
+          else
+            echo "Non-manual trigger: using full env list"
+            SELECTED=$(jq '[.[] | .name]' configuration/envs.json)
+          fi
+
+          echo "Selected env list: $SELECTED"
+
+          FILTERED=$(jq --argjson names "$SELECTED" '[.[] | select(.name as $n | $names | index($n))]' configuration/envs.json)
+
+          result=$(echo "$FILTERED" | jq -c '
+            (map(.name)) as $names
+            | {env: $names[0], remainingEnvs: $names[1:]}
+          ')
+
+          echo "env=$(echo "$result" | jq -r '.env')" >> $GITHUB_OUTPUT
+          echo "remainingEnvs=$(echo "$result" | jq -c '.remainingEnvs')" >> $GITHUB_OUTPUT
+
+  plan:
+    name: Terraform Plan (on PR)
+    if: github.event_name == 'pull_request'
+    needs: generate
+    uses: ./.github/workflows/tf_plan.yml
+    with:
+      matrix: ${{ needs.generate.outputs.matrix }}
+    secrets: inherit
+
+  deploy:
+    name: Start chain
+    runs-on: ubuntu-latest
+    needs: generate
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    env:
+      GH_TOKEN: ${{ secrets.PAT_WORKFLOW }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start chain
+        run: |
+          gh workflow run "Terraform plan/apply CI/CD" \
+            --repo "${{ github.repository }}" \
+            --ref "${{ github.ref_name }}" \
+            -f env='${{ needs.generate.outputs.firstEnv }}' \
+            -f remainingEnvs='${{ needs.generate.outputs.remainingEnvs }}'
