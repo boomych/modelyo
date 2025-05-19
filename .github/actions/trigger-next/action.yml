@@ -1,0 +1,42 @@
+name: Trigger next environment in chain
+
+description: >
+  Composite action to compute and trigger the next environment in a deployment chain.
+  Used for chaining calls to tf_apply.yml.
+
+inputs:
+  env:
+    description: "Current environment name"
+    required: true
+  remaining_envs:
+    description: "JSON array of remaining env names"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Trigger next env (if any)
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      shell: bash
+      run: |
+        CURRENT="${{ inputs.env }}"
+        REMAINING='${{ inputs.remaining_envs }}'
+
+        echo "Current env: $CURRENT"
+        echo "Remaining list: $REMAINING"
+
+        NEXT_ENV=$(echo "$REMAINING" | jq -r '.[0]')
+        NEXT_REMAINING=$(echo "$REMAINING" | jq -c '.[1:]')
+
+        if [ "$NEXT_ENV" == "null" ] || [ -z "$NEXT_ENV" ]; then
+          echo "No more environments. Deployment chain complete."
+          exit 0
+        fi
+
+        echo "Triggering $NEXT_ENV with rest: $NEXT_REMAINING"
+
+        gh workflow run tf_apply.yml \
+          --ref "${{ github.ref_name }}" \
+          -f env="$NEXT_ENV" \
+          -f remainingEnvs="$NEXT_REMAINING"
