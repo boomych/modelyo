@@ -26,6 +26,8 @@ jobs:
       - name: Generate all tfvars
         run: python3 scripts/generate_tfvars.py
 
+      - run: ls -R tf
+
       - name: Upload tfvars
         uses: actions/upload-artifact@v3
         with:
