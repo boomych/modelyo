@@ -146,6 +146,9 @@ jobs:
         run: |
           source ~/.venvs/ansible/bin/activate
           [ -f ansible/passwords.yml ] || kolla-genpwd -p ansible/passwords.yml
+
+          ls -l ansible
+
           ansible -i ansible/inventory.ini all -m ping
           kolla-ansible -i ansible/inventory.ini --passwords ansible/passwords.yml bootstrap-servers
           kolla-ansible -i ansible/inventory.ini --passwords ansible/passwords.yml prechecks
