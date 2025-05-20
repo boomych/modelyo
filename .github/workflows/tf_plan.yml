@@ -10,7 +10,7 @@ on:
 jobs:
   plan:
     name: Terraform Plan (on PR)
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         include: ${{ fromJson(inputs.matrix) }}

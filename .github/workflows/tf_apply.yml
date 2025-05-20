@@ -35,7 +35,7 @@ on:
 jobs:
   terraform:
     name: Deploy terraform to environment ${{ inputs.env }} on run ${{ inputs.runName }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     continue-on-error: false
     environment:
       name: ${{ inputs.env }}
@@ -100,7 +100,7 @@ jobs:
   ansible:
     name: Run Ansible on provisioned VMs for ${{ inputs.env }} on run ${{ inputs.runName }}
     needs: terraform
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
 
@@ -152,7 +152,7 @@ jobs:
   trigger_next:
     name: Trigger next env from ${{ inputs.remainingEnvs }} on run ${{ inputs.runName }}
     needs: ansible
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/trigger-next
