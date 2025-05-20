@@ -147,6 +147,23 @@ jobs:
               nova-serialproxy
               nova-conductor
               nova-compute-ironic
+              neutron-server
+              neutron-openvswitch-agent
+              neutron-linuxbridge-agent
+              neutron-dhcp-agent
+              neutron-l3-agent
+              neutron-metadata-agent
+              neutron-ovn-agent
+              neutron-ovn-metadata-agent
+              neutron-compute
+              neutron-compute-ironic
+              neutron-sriov-agent
+              neutron-mlnx-agent
+              neutron-eswitchd
+              neutron-bgp-dragent
+              neutron-infoblox-ipam-agent
+              neutron-metering-agent
+              ironic-neutron-agent
             )
             for group in "${groups[@]}"; do
               echo ""
