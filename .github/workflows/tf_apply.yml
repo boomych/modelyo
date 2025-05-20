@@ -146,9 +146,9 @@ jobs:
         run: |
           source ~/.venvs/ansible/bin/activate
           kolla-genpwd -p ansible/passwords.yml
-          cd ansible
-          kolla-ansible -i inventory.ini bootstrap-servers
-          kolla-ansible -i inventory.ini prechecks
+          ansible -i ansible/inventory.ini all -m ping
+          kolla-ansible -i ansible/inventory.ini --passwords ansible/passwords.yml bootstrap-servers
+          kolla-ansible -i ansible/inventory.ini --passwords ansible/passwords.yml prechecks
 
       # - name: Run Ansible Playbook
       #   working-directory: ansible
