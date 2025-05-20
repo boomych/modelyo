@@ -149,7 +149,7 @@ jobs:
           kolla-genpwd -p passwords.yml
           ansible -i inventory.ini all -m ping
           kolla-ansible bootstrap-servers -i inventory.ini --configdir ./
-          kolla-ansible prechecks -i inventory.ini ----configdir ./
+          kolla-ansible prechecks -i inventory.ini --configdir ./
 
       # - name: Run Ansible Playbook
       #   working-directory: ansible
