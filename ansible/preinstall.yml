@@ -1,9 +1,17 @@
-- name: Ensure python docker SDK is available
+- name: Ensure Docker and Python Docker SDK are installed and running
   hosts: all
   become: true
   tasks:
-    - name: Ensure python3-docker is present
+    - name: Install Docker
       apt:
-        name: python3-docker
+        name:
+          - docker.io
+          - python3-docker
         state: present
         update_cache: true
+
+    - name: Enable and start Docker
+      systemd:
+        name: docker
+        enabled: true
+        state: started
