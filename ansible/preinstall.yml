@@ -1,14 +1,9 @@
-- name: Ensure docker SDK for Python is installed
+- name: Ensure python docker SDK is available
   hosts: all
   become: true
   tasks:
-    - name: Ensure pip3 is present
+    - name: Ensure python3-docker is present
       apt:
-        name: python3-pip
+        name: python3-docker
         state: present
         update_cache: true
-
-    - name: Ensure docker module is installed for Python
-      pip:
-        name: docker
-        executable: pip3
