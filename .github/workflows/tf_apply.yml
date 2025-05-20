@@ -126,7 +126,8 @@ jobs:
             echo ""
             echo "[compute]"
             jq -r --arg key "$KEY" '.compute_ips.value[] | . + " ansible_user=ubuntu ansible_ssh_private_key_file=" + $key' outputs.json
-          } > inventory.ini
+          } > $GITHUB_WORKSPACE/ansible/inventory.ini
+          cat $GITHUB_WORKSPACE/ansible/inventory.ini
 
       - name: Upload inventory file for Ansible
         uses: actions/upload-artifact@v4
@@ -145,6 +146,7 @@ jobs:
     needs: ansible
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/trigger-next
         with:
           env: ${{ inputs.env }}
