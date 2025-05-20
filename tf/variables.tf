@@ -78,6 +78,7 @@ variable "os_image" {
 }
 
 variable "public_key" {
-  type    = string
-  default = "SSH public key for remote access"
+  type      = string
+  sensitive = true
+  default   = "SSH public key for remote access"
 }
