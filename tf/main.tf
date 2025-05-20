@@ -27,6 +27,10 @@ resource "google_compute_instance" "controller" {
   machine_type = var.controller_type.instance_type
   zone         = var.zone
 
+  metadata = {
+    ssh-keys = "ubuntu:${var.public_key}"
+  }
+
   boot_disk {
     initialize_params {
       image = data.google_compute_image.ubuntu_image.name
@@ -49,6 +53,10 @@ resource "google_compute_instance" "compute" {
   name         = "${var.env_name}-openstack-compute-${count.index}"
   machine_type = var.compute_type.instance_type
   zone         = var.zone
+
+  metadata = {
+    ssh-keys = "ubuntu:${var.public_key}"
+  }
 
   boot_disk {
     initialize_params {
