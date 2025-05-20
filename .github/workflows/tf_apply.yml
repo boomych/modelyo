@@ -33,14 +33,16 @@ on:
         type: string
 
 jobs:
-  apply:
-    name: Deploy to environment ${{ inputs.env }} on run ${{ inputs.runName }}
+  terraform:
+    name: Deploy terraform to environment ${{ inputs.env }} on run ${{ inputs.runName }}
     runs-on: ubuntu-latest
     continue-on-error: false
     environment:
       name: ${{ inputs.env }}
       # just to visualize the link to the project
       url: https://console.cloud.google.com/compute/instances?project=promising-flash-460213-k1
+    outputs:
+      ssh_key_path: ${{ steps.ssh.outputs.key_path }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/tf-common
@@ -49,14 +51,79 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
+      - name: Generate SSH key for ${{ inputs.env }}
+        id: ssh
+        run: |
+          mkdir -p tf/keys
+          ssh-keygen -t rsa -b 4096 -f tf/keys/id_rsa_${{ inputs.env }} -N ""
+          echo "key_path=tf/keys/id_rsa_${{ inputs.env }}" >> $GITHUB_OUTPUT
+          echo "PUBKEY<<EOF" >> $GITHUB_ENV
+          cat tf/keys/id_rsa_${{ inputs.env }}.pub >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       # - name: Terraform Apply
       #   working-directory: tf
       #   run: |
       #     terraform workspace select -or-create ${{ inputs.env }}
-      #     terraform apply -auto-approve -var-file="envs/${{ inputs.env }}.tfvars.json"
+      #     terraform apply -auto-approve -var-file="envs/${{ inputs.env }}.tfvars.json" -var="public_key=$PUBKEY"
       #   env:
       #     GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
 
+      - name: Upload private key for Ansible
+        uses: actions/upload-artifact@v4
+        with:
+          name: id_rsa_${{ inputs.env }}
+          path: tf/keys/id_rsa_${{ inputs.env }}
+
+  ansible:
+    name: Run Ansible on provisioned VMs for ${{ inputs.env }} on run ${{ inputs.runName }}
+    needs: terraform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download SSH private key
+        uses: actions/download-artifact@v3
+        with:
+          name: id_rsa_${{ inputs.env }}
+          path: ~/.ssh
+
+      - name: Fix SSH key permissions
+        run: |
+          chmod 600 ~/.ssh/id_rsa_${{ inputs.env }}
+          mkdir ansible
+
+      - name: Terraform output to Ansible inventory
+        working-directory: tf
+        run: |
+          terraform output -json > outputs.json
+          KEY=~/.ssh/id_rsa_${{ inputs.env }}
+          {
+            echo "[controller]"
+            jq -r --arg key "$KEY" '.controller_ip.value | . + " ansible_user=ubuntu ansible_ssh_private_key_file=" + $key' outputs.json
+
+            echo ""
+            echo "[compute]"
+            jq -r --arg key "$KEY" '.compute_ips.value[] | . + " ansible_user=ubuntu ansible_ssh_private_key_file=" + $key' outputs.json
+          } > $GITHUB_WORKSPACE/ansible/inventory.ini
+
+      - name: Upload inventory file for Ansible
+        uses: actions/upload-artifact@v4
+        with:
+          name: inventory_ini_${{ inputs.env }}
+          path: $GITHUB_WORKSPACE/ansible/inventory.ini
+
+      # - name: Run Ansible Playbook
+      #   working-directory: ansible
+      #   run: |
+      #     ansible-playbook -i inventory.ini ansible/site.yml \
+      #       --private-key ~/.ssh/id_rsa_${{ inputs.env }}
+
+  trigger_next:
+    name: Trigger next env from ${{ inputs.remainingEnvs }} on run ${{ inputs.runName }}
+    needs: ansible
+    runs-on: ubuntu-latest
+    steps:
       - uses: ./.github/actions/trigger-next
         with:
           env: ${{ inputs.env }}

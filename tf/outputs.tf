@@ -1,5 +1,6 @@
 output "controller_ip" {
-  value = google_compute_instance.controller.network_interface[0].access_config[0].nat_ip
+  description = "External IP of the controller"
+  value       = google_compute_instance.controller.network_interface[0].access_config[0].nat_ip
 }
 
 output "compute_ips" {

@@ -76,3 +76,7 @@ variable "os_image" {
   }
   description = "Image to be used in as guest OS for gcp VM"
 }
+
+variable "public_key" {
+  type = string
+}
