@@ -141,7 +141,11 @@ jobs:
 
             echo ""
             echo "[baremetal]"
-            jq -r --arg key "$KEY" '.controller_ip.value | . + " ansible_user=ubuntu ansible_ssh_private_key_file=" + $key' outputs.json
+            echo ""
+            echo "[bifrost]"
+
+
+
           } > inventory.ini
 
       - name: Upload inventory file for Ansible
