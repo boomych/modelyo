@@ -101,6 +101,9 @@ jobs:
     name: Run Ansible on provisioned VMs for ${{ inputs.env }} on run ${{ inputs.runName }}
     needs: terraform
     runs-on: self-hosted
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
 
@@ -133,15 +136,25 @@ jobs:
             echo "[compute]"
             jq -r --arg key "$KEY" '.compute_ips.value[] | . + " ansible_user=ubuntu ansible_ssh_private_key_file=" + $key' outputs.json
           } > inventory.ini
-          cat inventory.ini
-
-      - run: ls ansible
 
       - name: Upload inventory file for Ansible
         uses: actions/upload-artifact@v4
         with:
           name: inventory_ini_${{ inputs.env }}
           path: ansible/inventory.ini
+
+      - name: Install requirements for kolla
+        run: |
+          source ~/.venvs/ansible/bin/activate
+          pip install -r kolla-ansible/requirements.txt
+
+      - name: Kolla bootstrap
+        run: |
+          source ~/.venvs/ansible/bin/activate
+          kolla-genpwd -p ansible/passwords.yml
+          cd ansible
+          kolla-ansible -i inventory.ini bootstrap-servers
+          kolla-ansible -i inventory.ini prechecks
 
       # - name: Run Ansible Playbook
       #   working-directory: ansible
