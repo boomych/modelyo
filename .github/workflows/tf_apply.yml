@@ -154,6 +154,12 @@ jobs:
           name: inventory_ini_${{ inputs.env }}
           path: ansible/inventory.ini
 
+      - name: Install docker Python module on target hosts
+        working-directory: ansible
+        run: |
+          source ~/.venvs/ansible/bin/activate
+          ansible-playbook -i inventory.ini preinstall.yml
+
       - name: Kolla bootstrap
         working-directory: ansible
         run: |
