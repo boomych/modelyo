@@ -75,6 +75,12 @@ jobs:
           name: id_rsa_${{ inputs.env }}
           path: tf/keys/id_rsa_${{ inputs.env }}
 
+      - name: Cleanup Terraform lock for ${{ inputs.env }}
+        if: always()
+        run: |
+          echo "Removing lock for env: ${{ inputs.env }}"
+          gsutil rm -f gs://modelyo-tf-states-bucket/terraform/state/${{ inputs.env }}.tflock || true
+
   ansible:
     name: Run Ansible on provisioned VMs for ${{ inputs.env }} on run ${{ inputs.runName }}
     needs: terraform

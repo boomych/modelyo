@@ -39,6 +39,12 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
 
+      - name: Cleanup Terraform lock for ${{ matrix.name }}
+        if: always()
+        run: |
+          echo "Removing lock for env: ${{ matrix.name }}"
+          gsutil rm -f gs://modelyo-tf-states-bucket/terraform/state/${{ matrix.name }}.tflock || true
+
     concurrency:
       group: ${{ github.workflow }}-${{ matrix.name }}
       cancel-in-progress: true
