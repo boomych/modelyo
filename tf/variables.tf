@@ -72,7 +72,7 @@ variable "os_image" {
   })
   default = {
     project = "ubuntu-os-cloud"
-    family  = "ubuntu-2404-lts"
+    family  = "ubuntu-2404-lts-amd64"
   }
   description = "Image to be used in as guest OS for gcp VM"
 }
