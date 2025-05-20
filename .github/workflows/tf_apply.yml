@@ -145,7 +145,7 @@ jobs:
       - name: Kolla bootstrap
         run: |
           source ~/.venvs/ansible/bin/activate
-          [ -f ansible/passwords.yml ] || (touch ansible/passwords.yml && kolla-genpwd -p ansible/passwords.yml)
+          [ -f ansible/passwords.yml ] || (echo '---' > ansible/passwords.yml && kolla-genpwd -p ansible/passwords.yml)
 
           ls -l ansible
 
