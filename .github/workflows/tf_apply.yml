@@ -143,9 +143,6 @@ jobs:
             echo "[baremetal]"
             echo ""
             echo "[bifrost]"
-
-
-
           } > inventory.ini
 
       - name: Upload inventory file for Ansible
