@@ -51,11 +51,8 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
-      - name: Download TF variables
-        uses: actions/download-artifact@v4
-        with:
-          name: tfvars
-          path: tf/envs
+      - name: Generate tfvars
+        run: python3 scripts/generate_tfvars.py
 
       - name: Generate SSH key for ${{ inputs.env }}
         id: ssh
