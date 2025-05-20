@@ -142,11 +142,6 @@ jobs:
           name: inventory_ini_${{ inputs.env }}
           path: ansible/inventory.ini
 
-      - name: Install requirements for kolla
-        run: |
-          source ~/.venvs/ansible/bin/activate
-          pip install -r kolla-ansible/requirements.txt
-
       - name: Kolla bootstrap
         run: |
           source ~/.venvs/ansible/bin/activate
