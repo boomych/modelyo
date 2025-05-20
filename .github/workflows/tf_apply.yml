@@ -73,11 +73,11 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
 
-      - name: Log used public key
-        run: |
-          echo "---- Public key used for env ${{ inputs.env }} ----"
-          cat tf/keys/id_rsa_${{ inputs.env }}.pub
-          echo "---------------------------------------------"
+      # - name: Log used public key
+      #   run: |
+      #     echo "---- Public key used for env ${{ inputs.env }} ----"
+      #     cat tf/keys/id_rsa_${{ inputs.env }}.pub
+      #     echo "---------------------------------------------"
 
       - name: Upload TF outputs for Ansible
         uses: actions/upload-artifact@v4
@@ -158,12 +158,6 @@ jobs:
           ansible -i inventory.ini all -m ping
           kolla-ansible bootstrap-servers -i inventory.ini --configdir ./
           kolla-ansible prechecks -i inventory.ini --configdir ./
-
-      # - name: Run Ansible Playbook
-      #   working-directory: ansible
-      #   run: |
-      #     ansible-playbook -i inventory.ini ansible/site.yml \
-      #       --private-key ~/.ssh/id_rsa_${{ inputs.env }}
 
   trigger_next:
     name: Trigger next env from ${{ inputs.remainingEnvs }} on run ${{ inputs.runName }}
