@@ -15,6 +15,7 @@ def main():
         out_path = os.path.join(OUT_DIR, f"{name}.tfvars.json")
 
         filtered = {k: v for k, v in env.items() if k not in ["name", "needs"]}
+        filtered['env_name'] = name
 
         with open(out_path, "w") as f:
             json.dump(filtered, f, indent=2)
