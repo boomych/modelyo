@@ -28,7 +28,8 @@ resource "google_compute_instance" "controller" {
   zone         = var.zone
 
   metadata = {
-    ssh-keys = "ubuntu:${var.public_key}"
+    enable-oslogin = "FALSE"
+    ssh-keys       = "ubuntu:${var.public_key}"
   }
 
   boot_disk {
@@ -55,7 +56,8 @@ resource "google_compute_instance" "compute" {
   zone         = var.zone
 
   metadata = {
-    ssh-keys = "ubuntu:${var.public_key}"
+    enable-oslogin = "FALSE"
+    ssh-keys       = "ubuntu:${var.public_key}"
   }
 
   boot_disk {

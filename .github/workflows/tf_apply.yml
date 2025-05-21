@@ -35,7 +35,7 @@ on:
 jobs:
   terraform:
     name: Deploy terraform to environment ${{ inputs.env }} on run ${{ inputs.runName }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     continue-on-error: false
     environment:
       name: ${{ inputs.env }}
@@ -73,11 +73,11 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/account.json
 
-      - name: Log used public key
-        run: |
-          echo "---- Public key used for env ${{ inputs.env }} ----"
-          cat tf/keys/id_rsa_${{ inputs.env }}.pub
-          echo "---------------------------------------------"
+      # - name: Log used public key
+      #   run: |
+      #     echo "---- Public key used for env ${{ inputs.env }} ----"
+      #     cat tf/keys/id_rsa_${{ inputs.env }}.pub
+      #     echo "---------------------------------------------"
 
       - name: Upload TF outputs for Ansible
         uses: actions/upload-artifact@v4
@@ -100,7 +100,10 @@ jobs:
   ansible:
     name: Run Ansible on provisioned VMs for ${{ inputs.env }} on run ${{ inputs.runName }}
     needs: terraform
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
 
@@ -113,7 +116,6 @@ jobs:
       - name: Fix SSH key permissions
         run: |
           chmod 600 ~/.ssh/id_rsa_${{ inputs.env }}
-          mkdir ansible
 
       - name: Download TF outputs
         uses: actions/download-artifact@v4
@@ -132,25 +134,68 @@ jobs:
             echo ""
             echo "[compute]"
             jq -r --arg key "$KEY" '.compute_ips.value[] | . + " ansible_user=ubuntu ansible_ssh_private_key_file=" + $key' outputs.json
-          } > $GITHUB_WORKSPACE/ansible/inventory.ini
-          cat $GITHUB_WORKSPACE/ansible/inventory.ini
+
+            echo ""
+            echo "[loadbalancer]"
+            jq -r --arg key "$KEY" '.controller_ip.value | . + " ansible_user=ubuntu ansible_ssh_private_key_file=" + $key' outputs.json
+
+            groups=(
+              bifrost
+              baremetal
+              nova-novncproxy
+              nova-spicehtml5proxy
+              nova-serialproxy
+              nova-conductor
+              nova-compute-ironic
+              neutron-server
+              neutron-openvswitch-agent
+              neutron-linuxbridge-agent
+              neutron-dhcp-agent
+              neutron-l3-agent
+              neutron-metadata-agent
+              neutron-ovn-agent
+              neutron-ovn-metadata-agent
+              neutron-compute
+              neutron-compute-ironic
+              neutron-sriov-agent
+              neutron-mlnx-agent
+              neutron-eswitchd
+              neutron-bgp-dragent
+              neutron-infoblox-ipam-agent
+              neutron-metering-agent
+              ironic-neutron-agent
+            )
+            for group in "${groups[@]}"; do
+              echo ""
+              echo "[$group]"
+            done
+          } > inventory.ini
 
       - name: Upload inventory file for Ansible
         uses: actions/upload-artifact@v4
         with:
           name: inventory_ini_${{ inputs.env }}
-          path: $GITHUB_WORKSPACE/ansible/inventory.ini
+          path: ansible/inventory.ini
 
-      # - name: Run Ansible Playbook
-      #   working-directory: ansible
-      #   run: |
-      #     ansible-playbook -i inventory.ini ansible/site.yml \
-      #       --private-key ~/.ssh/id_rsa_${{ inputs.env }}
+      - name: Install docker Python module on target hosts
+        working-directory: ansible
+        run: |
+          source ~/.venvs/ansible/bin/activate
+          ansible-playbook -i inventory.ini preinstall.yml
+
+      - name: Kolla bootstrap
+        working-directory: ansible
+        run: |
+          source ~/.venvs/ansible/bin/activate
+          kolla-genpwd -p passwords.yml
+          ansible -i inventory.ini all -m ping
+          kolla-ansible bootstrap-servers -i inventory.ini --configdir ./
+          kolla-ansible prechecks -i inventory.ini --configdir ./
 
   trigger_next:
     name: Trigger next env from ${{ inputs.remainingEnvs }} on run ${{ inputs.runName }}
     needs: ansible
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/trigger-next
